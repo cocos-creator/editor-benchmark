@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <title>Empty Page</title>
+        <meta charset="utf-8">
+        <style>
+        </style>
+
+        <script type="text/javascript" src="app://bower_components/pixi/bin/pixi.js"></script>
+        <script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+    </head>
+
+
+    <body>
+        <canvas id='canvas' width='400' height='300'>
+    </body>
+
+    <script type="text/javascript">
+        var Ipc = require('ipc');
+
+        var canvas = document.getElementById('canvas');
+
+        var width  = canvas.width;
+        var height = canvas.height;
+
+        this.renderer = PIXI.autoDetectRenderer(width, height, {
+            backgroundColor: 0x1099bb,
+            view: canvas,
+        });
+
+        // create the root of the scene graph
+        var stage = new PIXI.Container();
+
+        this.stats = new Stats();
+        this.stats.domElement.style.position = "absolute";
+        this.stats.domElement.style.top = "10px";
+        document.body.appendChild( this.stats.domElement );
+
+        // create a texture from an image path
+        var texture = PIXI.Texture.fromImage('editor-framework://benchmark/images/bunny.png');
+
+        this.bunnies = [];        
+
+        // start animating
+        var animate = function () {
+            this.stats.begin();
+
+            // Open comment to use requestAnimationFrame.
+            requestAnimationFrame(animate);
+
+            for (var i = 0; i < this.bunnies.length; i++) {
+                this.bunnies[i].rotation += 0.1;
+            }
+
+            // render the container
+            this.renderer.render(stage);
+
+            this.stats.end();
+        }.bind(this);
+
+        // setInterval(animate, 1000/60);
+        // Open comment to use requestAnimationFrame.
+        animate();
+
+
+        var resize = function () {
+            this.renderer.resize(window.outerWidth, window.outerHeight);
+        }.bind(this);
+
+        window.onresize = resize;
+        resize();
+
+        Ipc.on('add-bunnies', function() {
+            for (var i = 0; i < 5000; i++) {
+                // create a new Sprite using the texture
+                var bunny = new PIXI.Sprite(texture);
+
+                // center the sprite's anchor point
+                bunny.anchor.x = 0.5;
+                bunny.anchor.y = 0.5;
+
+                // move the sprite to the center of the screen
+                bunny.position.x = width  * Math.random();
+                bunny.position.y = height * Math.random();
+
+                stage.addChild(bunny);
+
+                this.bunnies.push(bunny);
+            }
+
+            Ipc.sendToHost('bunnies-length:changed', this.bunnies.length);
+        }.bind(this));
+
+        Ipc.on('clear-bunnies', function() {
+
+            for (var i = 0; i < this.bunnies.length; i++) {
+                stage.removeChild(this.bunnies[i]);
+            }
+
+            this.bunnies.splice(0, this.bunnies.length);
+
+            Ipc.sendToHost('bunnies-length:changed', this.bunnies.length);
+        }.bind(this));
+
+    </script>
+</html>

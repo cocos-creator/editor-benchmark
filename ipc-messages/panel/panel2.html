@@ -1,0 +1,37 @@
+<dom-module id="benchmark-ipc-messages-panel2">
+   
+    <style type="text/css">
+    </style>
+
+    <template>
+    </template>
+</dom-module>
+
+<script>
+
+Editor.registerPanel( 'benchmark-ipc-messages.panel2', {
+    is: 'benchmark-ipc-messages-panel2',
+
+    ready: function () {
+        
+    },
+
+    "benchmark:renderer-query-from-renderer": function () {
+        Editor.sendToAll('benchmark:renderer-query-from-renderer', Editor.selfExcluded);
+    },
+
+    "benchmark:begin-renderer-to-renderer": function (messagesLength) {
+        this.current = 0;
+        this.messagesLength = messagesLength;
+    },    
+
+    "benchmark:renderer-to-renderer": function () {
+
+        this.current ++;
+
+        if (this.current === this.messagesLength) {
+            Editor.sendToAll("benchmark:end-renderer-to-renderer");
+        }
+    }
+});
+</script>

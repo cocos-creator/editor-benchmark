@@ -1,0 +1,45 @@
+{
+  "name": "benchmark-multi-webview-webgl",
+  "version": "0.0.1",
+  "description": "Test multiple windows webgl performance",
+  "author": "Firebox Technology",
+  "main": "main.js",
+  "menus": {
+    "Benchmark/MultiWebviewWebgl": {
+      "message": "benchmark-multi-webview-webgl:open"
+    },
+    "Benchmark/WebviewWebgl": {
+      "message": "benchmark-webview-webgl:open"
+    }
+  },
+  "panels": {
+    "panel1": {
+      "frame": "panel/panel1.html",
+      "type": "dockable",
+      "title": "Benchmark - Webview Webgl - 1",
+      "width": 600,
+      "height": 400,
+      "min-width": 600,
+      "min-height": 400,
+      "messages": [
+          "benchmark:add-bunnies",
+          "benchmark:add-texts",
+          "benchmark:clear-panel"
+      ]
+    },
+    "panel2": {
+      "frame": "panel/panel2.html",
+      "type": "dockable",
+      "title": "Benchmark - Webview Webgl - 2",
+      "width": 600,
+      "height": 400,
+      "min-width": 600,
+      "min-height": 400,
+      "messages": [
+          "benchmark:add-bunnies",
+          "benchmark:add-texts",
+          "benchmark:clear-panel"
+      ]
+    }
+  }
+}

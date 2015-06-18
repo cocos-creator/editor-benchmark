@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <title>Empty Page</title>
+        <meta charset="utf-8">
+        <style>
+        </style>
+
+        <script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+    </head>
+
+
+    <body>
+        <canvas id='canvas' width='400' height='300'>
+    </body>
+
+    <script type="text/javascript">
+        var canvas = document.getElementById('canvas');
+
+        // var gl = canvas.getContext('webgl');
+        var ctx = canvas.getContext('2d');
+
+        this.stats = new Stats();
+        this.stats.domElement.style.position = "absolute";
+        this.stats.domElement.style.top = "10px";
+        document.body.appendChild( this.stats.domElement );
+      
+
+        // start animating
+        var animate = function () {
+            this.stats.begin();
+
+            requestAnimationFrame(animate);
+
+            // gl.clear(gl.COLOR_BUFFER_BIT);
+            ctx.clearRect(0, 0, 1, 1);
+
+            this.stats.end();
+        }.bind(this);
+
+        // setInterval(animate, 1000/60);
+        
+        animate();
+
+    </script>
+</html>

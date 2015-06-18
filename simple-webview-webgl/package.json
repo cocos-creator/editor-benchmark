@@ -1,0 +1,25 @@
+{
+  "name": "benchmark-simple-webview-webgl",
+  "version": "0.0.1",
+  "description": "Test simple webview webgl performance",
+  "author": "Firebox Technology",
+  "main": "main.js",
+  "menus": {
+    "Benchmark/SimpleWebviewWebgl": {
+      "message": "benchmark-simple-webview-webgl:open"
+    }
+  },
+  "panels": {
+    "panel1": {
+      "frame": "panel/panel1.html",
+      "type": "dockable",
+      "title": "Benchmark - Simple Webview Webgl",
+      "width": 600,
+      "height": 400,
+      "min-width": 600,
+      "min-height": 400,
+      "messages": [
+      ]
+    }
+  }
+}

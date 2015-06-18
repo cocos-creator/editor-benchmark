@@ -1,0 +1,45 @@
+{
+  "name": "benchmark-ipc-messages",
+  "version": "0.0.1",
+  "description": "Test ipc messages performance",
+  "author": "Firebox Technology",
+  "main": "main.js",
+  "menus": {
+    "Benchmark/IpcMessages": {
+      "message": "benchmark-ipc-messages:open"
+    }
+  },
+  "panels": {
+    "panel1": {
+      "frame": "panel/panel1.html",
+      "type": "dockable",
+      "title": "Benchmark - Ipc Messages 1",
+      "width": 600,
+      "height": 400,
+      "min-width": 600,
+      "min-height": 400,
+      "messages": [
+        "benchmark:renderer-query-from-renderer",
+        "benchmark:main-to-renderer",
+        "benchmark:end-renderer-to-main",
+        "benchmark:end-renderer-to-renderer"
+
+      ]
+    },
+    "panel2": {
+      "frame": "panel/panel2.html",
+      "type": "dockable",
+      "title": "Benchmark - Ipc Messages 2",
+      "width": 600,
+      "height": 400,
+      "min-width": 600,
+      "min-height": 400,
+      "messages": [
+        "benchmark:renderer-query-from-renderer",
+        
+        "benchmark:begin-renderer-to-renderer",
+        "benchmark:renderer-to-renderer"
+      ]
+    }
+  }
+}

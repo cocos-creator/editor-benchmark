@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <title>Empty Page</title>
+        <meta charset="utf-8">
+        <style>
+            body {
+                position: relative;
+                margin: 3px;
+                padding: 0px;
+                border: 0px;
+
+                font-size: 13px;
+                font-family: 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, sans-serif;
+                overflow: hidden;
+
+                color: #888;
+                background-color: #333;
+            }
+            h1 {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%,-50%);
+                margin: 0px;
+            }
+            * {
+                user-select: none;
+                -webkit-user-select: none;
+                cursor: default;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>WebView</h1>
+    </body>
+
+    <script type="text/javascript">
+        var Ipc = require('ipc');
+
+        Ipc.on('benchmark:host-query-from-webview', function() {
+            Ipc.sendToHost('benchmark:host-query-from-webview');
+        }.bind(this));
+
+        Ipc.on('benchmark:begin-host-to-webview', function(messageLength) {
+            this.current = 0;
+            this.messageLength = messageLength;
+        }.bind(this));
+
+        Ipc.on('benchmark:host-to-webview', function(messageLength) {
+            this.current ++;
+
+            if (this.current === this.messageLength) {
+                Ipc.sendToHost('benchmark:end-host-to-webview');
+            }
+        }.bind(this));
+
+        Ipc.on('benchmark:begin-webview-to-host', function() {
+            var messageTimes = [].pop.call(arguments);
+            [].splice.call(arguments, 0, 0, 'benchmark:webview-to-host');
+
+            for (var i = 0; i < messageTimes; i++) {
+                Ipc.sendToHost.apply(Ipc, arguments);                
+            }
+        }.bind(this));
+
+    </script>
+</html>

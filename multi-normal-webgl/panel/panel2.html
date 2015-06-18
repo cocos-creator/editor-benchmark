@@ -1,0 +1,198 @@
+<dom-module id="benchmark-multiple-normal-webgl-panel2">
+   
+    <style type="text/css">
+        #wrapper {
+            width: 60%;
+            height: 100%;
+            float: left;
+        }
+
+        #content {
+            width: 40%;
+            float: right;
+        }
+
+    </style>
+
+    <template>
+        <div id='wrapper' class="layout vertical fit">
+            <canvas id='canvas' width='400' height='300'>
+        </div>
+        <div id='content'>
+            <div>
+                <button on-click='_onAddText'>Add Text</button>
+                <span>{{texts.length}}</span>
+
+                <button  on-click='_onAddBunnies'>Add Bunnies</button>
+                <span>{{bunnies.length}}</span>
+
+                <button on-click='_onClear'>Clear</button>
+            </div>
+            
+            <ul id='texts'>
+                <template is="dom-repeat" id="list" items="{{texts}}">
+                    <li>{{item}}</li>
+                </template>
+            </ul>
+        </div>
+    </template>
+</dom-module>
+
+<script type="text/javascript" src="app://bower_components/pixi/bin/pixi.js"></script>
+<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+
+<script>
+Editor.registerPanel( 'benchmark-multiple-normal-webgl.panel2', {
+    is: 'benchmark-multiple-normal-webgl-panel2',
+
+    listeners: {
+        'resize': '_onResize',
+    },
+
+    properties: {
+        texts: {
+            type: Array,
+            value: function() {
+                return [];
+            },
+            notify: true
+        },
+
+        bunnies: {
+            type: Array,
+            value: function() {
+                return [];
+            },
+            notify: true
+        }
+    },
+
+    created: function () {
+        this.stats    = null;
+        this.renderer = null;
+        this.stage    = null;
+        this.texture  = null;
+
+        this.current  = 0; 
+    },
+
+    ready: function () {
+        var width  = this.$.canvas.width;
+        var height = this.$.canvas.height;
+
+        // var canvas = document.getElementById('canvas');
+        this.renderer = PIXI.autoDetectRenderer(width, height, {
+            backgroundColor: 0x1099bb, 
+            view: this.$.canvas,
+        });
+
+        // create the root of the scene graph
+        this.stage = new PIXI.Container();
+
+        this.stats = new Stats();
+        this.stats.domElement.style.position = "absolute";
+        this.stats.domElement.style.top = "20px";
+        this.$.wrapper.appendChild( this.stats.domElement );
+
+        // create a texture from an image path
+        this.texture = PIXI.Texture.fromImage('editor-framework://benchmark/images/bunny.png');
+
+        // Open comment to use requestAnimationFrame.
+        this.update();
+        // setInterval(this.update.bind(this), 1000/60);
+    },
+
+    update: function () {
+        this.stats.begin();
+
+        // Open comment to use requestAnimationFrame.
+        requestAnimationFrame(this.update.bind(this));
+
+        for (var i = 0; i < this.bunnies.length; i++) {
+            this.bunnies[i].rotation += 0.1;
+        }
+
+        // update texts
+        this.current ++;
+
+        if (this.texts.length > 0) {
+            for (var i = 0; i < this.texts.length; i++) {
+                this.texts[i] = 'current : ' + this.current;
+            }
+
+            this.set('texts', this.texts.slice(0));
+        }
+
+        // render the container
+        this.renderer.render(this.stage);
+
+        this.stats.end();
+    },
+
+    attached: function () {
+        this.async(function() {
+            this.lightDomReady();
+        });
+    },
+
+    lightDomReady: function() {
+        this._onResize();
+    },
+
+    _onResize: function ( event ) {
+        var rect = this.$.wrapper.getBoundingClientRect();
+        this.renderer.resize(rect.width, rect.height);
+    },
+
+    _onAddText: function () {
+        Editor.sendToAll('benchmark:add-texts');
+    },
+
+    _onAddBunnies: function () {
+        Editor.sendToAll('benchmark:add-bunnies');
+    },
+
+    _onClear: function () {
+        Editor.sendToAll('benchmark:clear-panel');
+    },
+
+    'benchmark:add-bunnies': function () {
+        var width  = this.$.canvas.width;
+        var height = this.$.canvas.height;
+
+        for (var i = 0; i<5000; i++) {
+            // create a new Sprite using the texture
+            var bunny = new PIXI.Sprite(this.texture);
+
+            // center the sprite's anchor point
+            bunny.anchor.x = 0.5;
+            bunny.anchor.y = 0.5;
+
+            // move the sprite to the center of the screen
+            bunny.position.x = width  * Math.random();
+            bunny.position.y = height * Math.random();
+
+            this.stage.addChild(bunny);
+
+            this.bunnies.push(bunny);
+        }
+
+        this.set('bunnies', this.bunnies.slice(0));
+    },
+
+    'benchmark:add-texts': function () {
+        this.texts.length += 100;
+    },
+
+    'benchmark:clear-panel': function () {
+        this.texts.length = 0;
+        
+        for (var i = 0; i < this.bunnies.length; i++) {
+            this.stage.removeChild(this.bunnies[i]);
+        }
+
+        this.bunnies = [];
+        this.texts   = [];
+    }
+});
+</script>

@@ -1,0 +1,86 @@
+<dom-module id="benchmark-simple-webview-webgl-panel1">
+    <style type="text/css">
+        #view-wrapper {
+            width: 60%;
+            height: 100%;
+            float: left;
+        }
+
+        #content {
+            width: 40%;
+        }
+
+    </style>
+    <template>
+        <div id='view-wrapper'>
+            <webview id="view" src="../env/webgl.html" nodeintegration disablewebsecurity>
+        </div>
+        <div id='content'>
+            <div>
+                <div>Texts</div>
+                <span>{{texts.length}}</span>
+            </div>
+            
+            <ul id='texts'>
+                <template is="dom-repeat" id="list" items="{{texts}}">
+                    <li>{{item}}</li>
+                </template>
+            </ul>
+        </div>
+    </template>
+</dom-module>
+
+<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+
+<script>
+Editor.registerPanel( 'benchmark-simple-webview-webgl.panel1', {
+    is: 'benchmark-simple-webview-webgl-panel1',
+
+    listeners: {
+    },
+
+    properties: {
+        texts: {
+            type: Array,
+            value: function() {
+                return [];
+            },
+            notify: true
+        }
+    },
+
+    ready: function() {
+
+        this.current = 0;
+        this.texts.length = 1500;
+
+        this.stats = new Stats();
+        this.stats.domElement.style.position = "absolute";
+        this.stats.domElement.style.right = "10px";
+        this.stats.domElement.style.top = "10px";
+        this.$.content.appendChild( this.stats.domElement );
+
+        // setInterval(this.update.bind(this), 1000/60);
+        
+        this.update();
+    },
+
+    update: function () {
+        this.stats.begin();
+
+        this.current ++;
+
+        requestAnimationFrame(this.update.bind(this));
+
+        if (this.texts.length > 0) {
+            for (var i = 0; i < this.texts.length; i++) {
+                this.texts[i] = 'current : ' + this.current;
+            }
+
+            this.set('texts', this.texts.slice(0));
+        }
+
+        this.stats.end();
+    }
+});
+</script>
