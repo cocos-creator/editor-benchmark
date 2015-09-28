@@ -1,3 +1,5 @@
+<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+
 <dom-module id="benchmark-simple-webview-webgl-panel1">
     <style type="text/css">
         #view-wrapper {
@@ -20,7 +22,7 @@
                 <div>Texts</div>
                 <span>{{texts.length}}</span>
             </div>
-            
+
             <ul id='texts'>
                 <template is="dom-repeat" id="list" items="{{texts}}">
                     <li>{{item}}</li>
@@ -28,59 +30,55 @@
             </ul>
         </div>
     </template>
-</dom-module>
 
-<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
-
-<script>
-Editor.registerPanel( 'benchmark-simple-webview-webgl.panel1', {
-    is: 'benchmark-simple-webview-webgl-panel1',
-
-    listeners: {
-    },
-
-    properties: {
-        texts: {
-            type: Array,
-            value: function() {
-                return [];
+    <script>
+        Editor.registerPanel( 'benchmark-simple-webview-webgl.panel1', {
+            listeners: {
             },
-            notify: true
-        }
-    },
 
-    ready: function() {
+            properties: {
+                texts: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    },
+                    notify: true
+                }
+            },
 
-        this.current = 0;
-        this.texts.length = 1500;
+            ready: function() {
 
-        this.stats = new Stats();
-        this.stats.domElement.style.position = "absolute";
-        this.stats.domElement.style.right = "10px";
-        this.stats.domElement.style.top = "10px";
-        this.$.content.appendChild( this.stats.domElement );
+                this.current = 0;
+                this.texts.length = 1500;
 
-        // setInterval(this.update.bind(this), 1000/60);
-        
-        this.update();
-    },
+                this.stats = new Stats();
+                this.stats.domElement.style.position = "absolute";
+                this.stats.domElement.style.right = "10px";
+                this.stats.domElement.style.top = "10px";
+                this.$.content.appendChild( this.stats.domElement );
 
-    update: function () {
-        this.stats.begin();
+                // setInterval(this.update.bind(this), 1000/60);
 
-        this.current ++;
+                this.update();
+            },
 
-        requestAnimationFrame(this.update.bind(this));
+            update: function () {
+                this.stats.begin();
 
-        if (this.texts.length > 0) {
-            for (var i = 0; i < this.texts.length; i++) {
-                this.texts[i] = 'current : ' + this.current;
+                this.current ++;
+
+                requestAnimationFrame(this.update.bind(this));
+
+                if (this.texts.length > 0) {
+                    for (var i = 0; i < this.texts.length; i++) {
+                        this.texts[i] = 'current : ' + this.current;
+                    }
+
+                    this.set('texts', this.texts.slice(0));
+                }
+
+                this.stats.end();
             }
-
-            this.set('texts', this.texts.slice(0));
-        }
-
-        this.stats.end();
-    }
-});
-</script>
+        });
+    </script>
+</dom-module>

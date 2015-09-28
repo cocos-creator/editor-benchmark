@@ -1,3 +1,5 @@
+<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
+
 <dom-module id="benchmark-multi-webview-webgl-panel2">
     <style type="text/css">
         #view-wrapper {
@@ -22,10 +24,10 @@
 
                 <button on-click='_onAddBunnies'>Add Bunnies</button>
                 <span>{{bunnies}}</span>
-                
+
                 <button on-click='_onClear'>Clear</button>
             </div>
-            
+
             <ul id='texts'>
                 <template is="dom-repeat" id="list" items="{{texts}}">
                     <li>{{item}}</li>
@@ -33,92 +35,88 @@
             </ul>
         </div>
     </template>
-</dom-module>
 
-<script type="text/javascript" src="app://bower_components/stats.js/build/stats.min.js"></script>
-
-<script>
-Editor.registerPanel( 'benchmark-multi-webview-webgl.panel2', {
-    is: 'benchmark-multi-webview-webgl-panel2',
-
-    listeners: {
-    },
-
-    properties: {
-        texts: {
-            type: Array,
-            value: function() {
-                return [];
+    <script>
+        Editor.registerPanel( 'benchmark-multi-webview-webgl.panel2', {
+            listeners: {
             },
-            notify: true
-        }
-    },
 
-    ready: function() {
+            properties: {
+                texts: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    },
+                    notify: true
+                }
+            },
 
-        this.current = 0;
-        this.bunnies = 0;
+            ready: function() {
 
-        this.$.view.addEventListener('ipc-message', function(event) {
-            if (event.channel === 'bunnies-length:changed') {
-                this.set('bunnies', event.args[0]);
+                this.current = 0;
+                this.bunnies = 0;
+
+                this.$.view.addEventListener('ipc-message', function(event) {
+                    if (event.channel === 'bunnies-length:changed') {
+                        this.set('bunnies', event.args[0]);
+                    }
+                }.bind(this));
+
+                // create Stats
+                this.stats = new Stats();
+                this.stats.domElement.style.position = "absolute";
+                this.stats.domElement.style.top = "10px";
+                this.stats.domElement.style.right = "10px";
+                this.$.content.appendChild( this.stats.domElement );
+
+                // setInterval(this.update.bind(this), 1000/60);
+                // Open comment to use requestAnimationFrame.
+                this.update();
+            },
+
+            update: function () {
+                this.stats.begin();
+
+                this.current ++;
+
+                if (this.texts.length > 0) {
+                    for (var i = 0; i < this.texts.length; i++) {
+                        this.texts[i] = 'current : ' + this.current;
+                    }
+
+                    this.set('texts', this.texts.slice(0));
+                }
+
+                // Open comment to use requestAnimationFrame.
+                requestAnimationFrame(this.update.bind(this));
+
+                this.stats.end();
+            },
+
+            _onAddText: function () {
+                Editor.sendToAll('benchmark:add-texts');
+            },
+
+            _onAddBunnies: function () {
+                Editor.sendToAll('benchmark:add-bunnies');
+            },
+
+            _onClear: function () {
+                Editor.sendToAll('benchmark:clear-panel');
+            },
+
+            'benchmark:add-bunnies': function () {
+                this.$.view.send('add-bunnies');
+            },
+
+            'benchmark:add-texts': function () {
+                this.set('texts.length', this.texts.length + 100);
+            },
+
+            'benchmark:clear-panel': function () {
+                this.texts = [];
+                this.$.view.send('clear-bunnies');
             }
-        }.bind(this));
-
-        // create Stats
-        this.stats = new Stats();
-        this.stats.domElement.style.position = "absolute";
-        this.stats.domElement.style.top = "10px";
-        this.stats.domElement.style.right = "10px";
-        this.$.content.appendChild( this.stats.domElement );
-
-        // setInterval(this.update.bind(this), 1000/60);
-        // Open comment to use requestAnimationFrame.
-        this.update();
-    },
-
-    update: function () {
-        this.stats.begin();
-
-        this.current ++;
-
-        if (this.texts.length > 0) {
-            for (var i = 0; i < this.texts.length; i++) {
-                this.texts[i] = 'current : ' + this.current;
-            }
-
-            this.set('texts', this.texts.slice(0));
-        }
-
-        // Open comment to use requestAnimationFrame.
-        requestAnimationFrame(this.update.bind(this));
-
-        this.stats.end();
-    },
-
-    _onAddText: function () {
-        Editor.sendToAll('benchmark:add-texts');
-    },
-
-    _onAddBunnies: function () {
-        Editor.sendToAll('benchmark:add-bunnies');
-    },
-
-    _onClear: function () {
-        Editor.sendToAll('benchmark:clear-panel');
-    },
-
-    'benchmark:add-bunnies': function () {
-        this.$.view.send('add-bunnies');
-    },
-
-    'benchmark:add-texts': function () {
-        this.set('texts.length', this.texts.length + 100);
-    },
-
-    'benchmark:clear-panel': function () {
-        this.texts = [];
-        this.$.view.send('clear-bunnies');
-    }
-});
-</script>
+        });
+    </script>
+</dom-module>

@@ -1,5 +1,5 @@
 <dom-module id="benchmark-ipc-messages-panel1">
-   
+
     <style type="text/css">
         :host {
             display: flex;
@@ -55,7 +55,7 @@
         }
 
         .message {
-            margin-left: 5px; 
+            margin-left: 5px;
         }
 
         em {
@@ -75,7 +75,7 @@
 
             <button on-click='_onReset'>Reset</button>
         </div>
-        <div id='final-result'> 
+        <div id='final-result'>
                 <div class='message'>Final Result: </div>
                 <div class='message'>Messages:          <em>{{result.messagesLength}}</em></div>
                 <br>
@@ -111,395 +111,392 @@
             </template>
         </ul>
     </template>
-</dom-module>
 
-<script>
+    <script>
+        var Fs = require('fs');
+        var path = Editor.url('editor-framework://benchmark/ipc-messages/message.json');
+        var message = JSON.parse(Fs.readFileSync(path)).message;
 
-var Fs = require('fs');
-var path = Editor.url('editor-framework://benchmark/ipc-messages/message.json');
-var message = JSON.parse(Fs.readFileSync(path)).message;
+        Editor.registerPanel( 'benchmark-ipc-messages.panel1', {
+            properties: {
+                messages: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
 
-Editor.registerPanel( 'benchmark-ipc-messages.panel1', {
-    is: 'benchmark-ipc-messages-panel1',
+                results: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
 
-    properties: {
-        messages: {
-            type: Array,
-            value: function() {
-                return [];
-            }
-        },
+                result: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            messagesLength: 0,
 
-        results: {
-            type: Array,
-            value: function() {
-                return [];
-            }
-        },
+                            rendererQueryFromMain: 0,
+                            rendererToMain: 0,
+                            mainToRenderer: 0,
 
-        result: {
-            type: Object,
-            value: function() {
-                return {
-                    messagesLength: 0,
-                    
-                    rendererQueryFromMain: 0,
-                    rendererToMain: 0,
-                    mainToRenderer: 0,
+                            rendererQueryFromRenderer: 0,
+                            rendererToRenderer: 0,
 
-                    rendererQueryFromRenderer: 0,
-                    rendererToRenderer: 0,
-
-                    hostQueryFromWebview: 0,
-                    hostToWebview: 0,
-                    webviewToHost: 0
-                };
-            }
-        }
-    },
-
-    created: function () {
-        this.testing = false;
-    },
-
-    ready: function () {
-        this._onAddMessages();
-
-        this.tests = [
-            this._testRendererQueryFromMain.bind(this),
-            this._testMainToRenderer.bind(this),
-            this._testRendererToMain.bind(this),
-
-            this._testRendererQueryFromRenderer.bind(this),
-            this._testRendererToRenderer.bind(this),
-
-            this._testHostQueryFromWebview.bind(this),
-            this._testHostToWebview.bind(this),
-            this._testWebviewToHost.bind(this),
-        ];
-
-        this.$.view.addEventListener('ipc-message', function(event) {
-            if (event.channel === 'benchmark:host-query-from-webview') {
-                this.hostQueryFromWebviewMessages ++;
-
-                if (this.hostQueryFromWebviewMessages === this.messages.length) {
-                    this._endTestHostQueryFromWebview();
+                            hostQueryFromWebview: 0,
+                            hostToWebview: 0,
+                            webviewToHost: 0
+                        };
+                    }
                 }
-            }
-            else if (event.channel === 'benchmark:end-host-to-webview') {
-                this._endTestHostToWebview();
-            }
-            else if (event.channel === 'benchmark:webview-to-host') {
-                this.webviewToHostMessages ++;
+            },
 
-                if (this.webviewToHostMessages === this.messages.length) {
-                    this._endTestWebviewToHost();
-                }
-            }
-        }.bind(this));
-    },
-
-    _onAddMessages: function () {
-        if(this.testing) return;
-
-        for (var i = 0; i < 200; i++) {
-            this.push('messages', message);
-        }
-    },
-
-    _onBegin: function () {
-        if (this.testing || this.messages.length === 0) {
-            return;
-        }
-
-        this.results = [];
-        this.testing = true;
-
-        var current = 0;
-        var testTimes = 10;
-
-
-        var testOnceCallBack = function () {
-            current ++;
-
-            if (current === testTimes) {
-                this._calcFinalResult();
+            created: function () {
                 this.testing = false;
-            }
-            else {
-                this._testOnce(testOnceCallBack);
-            }
-        }.bind(this);
+            },
 
-        this._testOnce(testOnceCallBack);
-    },
+            ready: function () {
+                this._onAddMessages();
 
-    _calcFinalResult: function () {
+                this.tests = [
+                    this._testRendererQueryFromMain.bind(this),
+                    this._testMainToRenderer.bind(this),
+                    this._testRendererToMain.bind(this),
 
-        var result = this.result;
-        var begin = true;
+                    this._testRendererQueryFromRenderer.bind(this),
+                    this._testRendererToRenderer.bind(this),
 
-        this.results.map( function (item) {
+                    this._testHostQueryFromWebview.bind(this),
+                    this._testHostToWebview.bind(this),
+                    this._testWebviewToHost.bind(this),
+                ];
 
-            for (var key in result) {
-                if (key === 'messagesLength') { continue; }
+                this.$.view.addEventListener('ipc-message', function(event) {
+                    if (event.channel === 'benchmark:host-query-from-webview') {
+                        this.hostQueryFromWebviewMessages ++;
 
-                if (begin) {
-                    result[key] = 0;    
+                        if (this.hostQueryFromWebviewMessages === this.messages.length) {
+                            this._endTestHostQueryFromWebview();
+                        }
+                    }
+                    else if (event.channel === 'benchmark:end-host-to-webview') {
+                        this._endTestHostToWebview();
+                    }
+                    else if (event.channel === 'benchmark:webview-to-host') {
+                        this.webviewToHostMessages ++;
+
+                        if (this.webviewToHostMessages === this.messages.length) {
+                            this._endTestWebviewToHost();
+                        }
+                    }
+                }.bind(this));
+            },
+
+            _onAddMessages: function () {
+                if(this.testing) return;
+
+                for (var i = 0; i < 200; i++) {
+                    this.push('messages', message);
+                }
+            },
+
+            _onBegin: function () {
+                if (this.testing || this.messages.length === 0) {
+                    return;
                 }
 
-                result[key] += item[key];
-            }
+                this.results = [];
+                this.testing = true;
 
-            begin = false;
-        }.bind(this));
+                var current = 0;
+                var testTimes = 10;
 
-        for (var key in result) {
-            if (key === 'messagesLength') { continue; }
 
-            this.set('result.' + key, result[key] / this.results.length);
-        }
+                var testOnceCallBack = function () {
+                    current ++;
 
-        this.set('result.messagesLength', this.messages.length);
-    },
+                    if (current === testTimes) {
+                        this._calcFinalResult();
+                        this.testing = false;
+                    }
+                    else {
+                        this._testOnce(testOnceCallBack);
+                    }
+                }.bind(this);
 
-    _testOnce: function (cb) {
+                this._testOnce(testOnceCallBack);
+            },
 
-        var result = {};
-        var current = 0;
+            _calcFinalResult: function () {
 
-        var runTestCallBack = function () {
-            current ++;
+                var result = this.result;
+                var begin = true;
 
-            if (current === this.tests.length) {
-                this.push('results', result);
+                this.results.map( function (item) {
 
-                cb();
-            } 
-            else {
+                    for (var key in result) {
+                        if (key === 'messagesLength') { continue; }
+
+                        if (begin) {
+                            result[key] = 0;
+                        }
+
+                        result[key] += item[key];
+                    }
+
+                    begin = false;
+                }.bind(this));
+
+                for (var key in result) {
+                    if (key === 'messagesLength') { continue; }
+
+                    this.set('result.' + key, result[key] / this.results.length);
+                }
+
+                this.set('result.messagesLength', this.messages.length);
+            },
+
+            _testOnce: function (cb) {
+
+                var result = {};
+                var current = 0;
+
+                var runTestCallBack = function () {
+                    current ++;
+
+                    if (current === this.tests.length) {
+                        this.push('results', result);
+
+                        cb();
+                    }
+                    else {
+                        runTest();
+                    }
+
+                }.bind(this);
+
+                var runTest = function () {
+                    var test = this.tests[current];
+                    test(result, runTestCallBack);
+                }.bind(this);
+
                 runTest();
-            }
+            },
 
-        }.bind(this);
+            _onReset: function () {
+                if(this.testing) return;
 
-        var runTest = function () {
-            var test = this.tests[current];
-            test(result, runTestCallBack);
-        }.bind(this);
+                this.messages = [];
+                this.results  = [];
+            },
 
-        runTest();
-    },
+            _testMainToRenderer: function (result, cb) {
 
-    _onReset: function () {
-        if(this.testing) return;
+                // send to main to begin this test
+                var args = this.messages[0].slice(0);
+                args.splice(0, 0, 'benchmark:main-to-renderer');
+                args.push(this.messages.length);
 
-        this.messages = [];
-        this.results  = [];
-    },
-
-    _testMainToRenderer: function (result, cb) {
-
-        // send to main to begin this test
-        var args = this.messages[0].slice(0);
-        args.splice(0, 0, 'benchmark:main-to-renderer');
-        args.push(this.messages.length);
-
-        Editor.sendToCore.apply(Editor, args);
-
-        // init values
-        this.mainToRendererMessages = 0;
-
-        var last = Date.now();
-
-        this._endTestMainToRenderer = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.mainToRenderer = time;
-            cb();
-        }
-    },
-
-    _testRendererToMain: function (result, cb) {
-        var onReply = function () {
-            for (var i = 0; i < this.messages.length; i++) {
-                var args = this.messages[i].slice(0);
-                args.splice(0, 0, 'benchmark:renderer-to-main');
-                
                 Editor.sendToCore.apply(Editor, args);
+
+                // init values
+                this.mainToRendererMessages = 0;
+
+                var last = Date.now();
+
+                this._endTestMainToRenderer = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.mainToRenderer = time;
+                    cb();
+                }
+            },
+
+            _testRendererToMain: function (result, cb) {
+                var onReply = function () {
+                    for (var i = 0; i < this.messages.length; i++) {
+                        var args = this.messages[i].slice(0);
+                        args.splice(0, 0, 'benchmark:renderer-to-main');
+
+                        Editor.sendToCore.apply(Editor, args);
+                    }
+
+                    this._endTestRendererToMain = function (time) {
+                        result.rendererToMain = time;
+                        cb();
+                    }
+                }.bind(this);
+
+                // send to main to begin this test
+                var args = this.messages[0].slice(0);
+                args.splice(0, 0, 'benchmark:begin-renderer-to-main');
+                args.push(this.messages.length);
+                args.push(onReply);
+
+                Editor.sendRequestToCore.apply(Editor, args);
+            },
+
+            _testRendererQueryFromMain: function (result, cb) {
+                var last = Date.now();
+                var current = 0;
+
+                var onReply = function () {
+                    current ++;
+
+                    if (current === this.messages.length) {
+                        var now  = Date.now();
+                        var time = (now - last) / 1000.0;
+
+                        result.rendererQueryFromMain = time;
+                        cb();
+                    }
+                }.bind(this);
+
+                for (var i = 0; i < this.messages.length; i++) {
+
+                    var args = this.messages[i].slice(0);
+                    args.splice(0, 0, 'benchmark:renderer-query-from-main');
+                    args.push( onReply );
+
+                    Editor.sendRequestToCore.apply(Editor, args);
+                }
+            },
+
+            _testRendererToRenderer: function (result, cb) {
+
+                Editor.sendToAll('benchmark:begin-renderer-to-renderer', this.messages.length);
+
+                var last = Date.now();
+
+                for (var i = 0; i < this.messages.length; i++) {
+                    var args = this.messages[i].slice(0);
+                    args.splice(0, 0, 'benchmark:renderer-to-renderer');
+                    args.push(Editor.selfExcluded);
+
+                    Editor.sendToAll.apply(Editor, args);
+                }
+
+                this._endTestRendererToRenderer = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.rendererToRenderer = time;
+                    cb();
+                }
+            },
+
+            _testRendererQueryFromRenderer: function (result, cb) {
+                this.rendererQueryFromRendererMessages = 0;
+                var last = Date.now();
+
+                for (var i = 0; i < this.messages.length; i++) {
+                    var args = this.messages[i].slice(0);
+                    args.splice(0, 0, 'benchmark:renderer-query-from-renderer');
+                    args.push(Editor.selfExcluded);
+
+                    Editor.sendToAll.apply(Editor, args);
+                }
+
+                this._endTestRendererQueryFromRenderer = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.rendererQueryFromRenderer = time;
+                    cb();
+                }
+            },
+
+            'benchmark:renderer-query-from-renderer': function () {
+                this.rendererQueryFromRendererMessages ++;
+
+                if(this.rendererQueryFromRendererMessages === this.messages.length) {
+                    this._endTestRendererQueryFromRenderer();
+                }
+            },
+
+            _testHostQueryFromWebview: function (result, cb) {
+
+                this.hostQueryFromWebviewMessages = 0;
+                var last = Date.now();
+
+                for (var i = 0; i < this.messages.length; i++) {
+                    var args = this.messages[i].slice(0);
+                    args.splice(0, 0, 'benchmark:host-query-from-webview');
+
+                    this.$.view.send.apply(this.$.view, args);
+                }
+
+                this._endTestHostQueryFromWebview = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.hostQueryFromWebview = time;
+                    cb();
+                }
+            },
+
+            _testHostToWebview: function (result, cb) {
+                this.$.view.send('benchmark:begin-host-to-webview', this.messages.length);
+
+                var last = Date.now();
+                var view = this.$.view;
+
+                for (var i = 0; i < this.messages.length; i++) {
+                    var args = this.messages[i].slice(0);
+                    args.splice(0, 0, 'benchmark:host-to-webview');
+
+                    view.send.apply(view, args);
+                }
+
+                this._endTestHostToWebview = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.hostToWebview = time;
+                    cb();
+                }
+            },
+
+            _testWebviewToHost: function (result, cb) {
+                this.webviewToHostMessages = 0;
+
+                var args = this.messages[0].slice(0);
+                args.splice(0, 0, 'benchmark:begin-webview-to-host');
+                args.push(this.messages.length);
+
+                this.$.view.send.apply(this.$.view, args);
+
+                var last = Date.now();
+
+                this._endTestWebviewToHost = function () {
+                    var now  = Date.now();
+                    var time = (now - last) / 1000.0;
+
+                    result.webviewToHost = time;
+                    cb();
+                }
+            },
+
+
+            "benchmark:main-to-renderer" : function () {
+                this.mainToRendererMessages ++;
+
+                if(this.mainToRendererMessages === this.messages.length) {
+                    this._endTestMainToRenderer();
+                }
+            },
+
+            "benchmark:end-renderer-to-main": function (time) {
+                this._endTestRendererToMain(time);
+            },
+
+            "benchmark:end-renderer-to-renderer": function () {
+                this._endTestRendererToRenderer();
             }
-
-            this._endTestRendererToMain = function (time) {
-                result.rendererToMain = time;
-                cb();
-            }
-        }.bind(this);
-
-        // send to main to begin this test
-        var args = this.messages[0].slice(0);
-        args.splice(0, 0, 'benchmark:begin-renderer-to-main');
-        args.push(this.messages.length);
-        args.push(onReply);
-
-        Editor.sendRequestToCore.apply(Editor, args);
-    },
-
-    _testRendererQueryFromMain: function (result, cb) {
-        var last = Date.now();
-        var current = 0;
-
-        var onReply = function () {
-            current ++;
-
-            if (current === this.messages.length) {
-                var now  = Date.now();
-                var time = (now - last) / 1000.0;
-
-                result.rendererQueryFromMain = time;
-                cb();
-            }
-        }.bind(this);
-
-        for (var i = 0; i < this.messages.length; i++) {
-
-            var args = this.messages[i].slice(0);
-            args.splice(0, 0, 'benchmark:renderer-query-from-main');
-            args.push( onReply );
-
-            Editor.sendRequestToCore.apply(Editor, args);
-        }
-    },
-
-    _testRendererToRenderer: function (result, cb) {
-
-        Editor.sendToAll('benchmark:begin-renderer-to-renderer', this.messages.length);
-
-        var last = Date.now();
-
-        for (var i = 0; i < this.messages.length; i++) {
-            var args = this.messages[i].slice(0);
-            args.splice(0, 0, 'benchmark:renderer-to-renderer');
-            args.push(Editor.selfExcluded);
-
-            Editor.sendToAll.apply(Editor, args);
-        }
-
-        this._endTestRendererToRenderer = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.rendererToRenderer = time;
-            cb();
-        }
-    },
-
-    _testRendererQueryFromRenderer: function (result, cb) {
-        this.rendererQueryFromRendererMessages = 0;
-        var last = Date.now();
-
-        for (var i = 0; i < this.messages.length; i++) {
-            var args = this.messages[i].slice(0);
-            args.splice(0, 0, 'benchmark:renderer-query-from-renderer');
-            args.push(Editor.selfExcluded);
-
-            Editor.sendToAll.apply(Editor, args);
-        }
-        
-        this._endTestRendererQueryFromRenderer = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.rendererQueryFromRenderer = time;
-            cb();
-        }
-    },
-
-    'benchmark:renderer-query-from-renderer': function () {
-        this.rendererQueryFromRendererMessages ++;
-
-        if(this.rendererQueryFromRendererMessages === this.messages.length) {
-            this._endTestRendererQueryFromRenderer();
-        }
-    },
-
-    _testHostQueryFromWebview: function (result, cb) {
-
-        this.hostQueryFromWebviewMessages = 0;
-        var last = Date.now();
-        
-        for (var i = 0; i < this.messages.length; i++) {
-            var args = this.messages[i].slice(0);
-            args.splice(0, 0, 'benchmark:host-query-from-webview');
-
-            this.$.view.send.apply(this.$.view, args);
-        }
-        
-        this._endTestHostQueryFromWebview = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.hostQueryFromWebview = time;
-            cb();
-        }
-    },
-
-    _testHostToWebview: function (result, cb) {
-        this.$.view.send('benchmark:begin-host-to-webview', this.messages.length);
-
-        var last = Date.now();
-        var view = this.$.view;
-
-        for (var i = 0; i < this.messages.length; i++) {
-            var args = this.messages[i].slice(0);
-            args.splice(0, 0, 'benchmark:host-to-webview');
-
-            view.send.apply(view, args);
-        }
-
-        this._endTestHostToWebview = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.hostToWebview = time;
-            cb();
-        }
-    },
-
-    _testWebviewToHost: function (result, cb) {
-        this.webviewToHostMessages = 0;
-
-        var args = this.messages[0].slice(0);
-        args.splice(0, 0, 'benchmark:begin-webview-to-host');
-        args.push(this.messages.length);
-
-        this.$.view.send.apply(this.$.view, args);
-
-        var last = Date.now();
-
-        this._endTestWebviewToHost = function () {
-            var now  = Date.now();
-            var time = (now - last) / 1000.0;
-
-            result.webviewToHost = time;
-            cb();
-        }
-    },
-
-
-    "benchmark:main-to-renderer" : function () {
-        this.mainToRendererMessages ++;
-
-        if(this.mainToRendererMessages === this.messages.length) {
-            this._endTestMainToRenderer();
-        }
-    },    
-
-    "benchmark:end-renderer-to-main": function (time) {
-        this._endTestRendererToMain(time);
-    },
-
-    "benchmark:end-renderer-to-renderer": function () {
-        this._endTestRendererToRenderer();
-    }
-});
-</script>
+        });
+    </script>
+</dom-module>
