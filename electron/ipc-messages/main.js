@@ -15,8 +15,8 @@ module.exports = {
         Editor.Panel.open(_panel2);
     },
 
-    'benchmark:renderer-query-from-main': function (reply) {
-        reply();
+    'benchmark:renderer-query-from-main': function (event) {
+        event.reply();
     },
 
     'benchmark:main-to-renderer': function () {
@@ -29,11 +29,11 @@ module.exports = {
         }
     },
 
-    'benchmark:begin-renderer-to-main': function (reply) {
+    'benchmark:begin-renderer-to-main': function (event) {
         this.current = 0;
         this.messagesLength = [].pop.call(arguments);
 
-        reply();
+        event.reply();
     },
 
     'benchmark:renderer-to-main': function () {

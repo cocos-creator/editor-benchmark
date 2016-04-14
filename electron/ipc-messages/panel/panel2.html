@@ -16,7 +16,7 @@
                 Editor.sendToAll('benchmark:renderer-query-from-renderer', Editor.selfExcluded);
             },
 
-            "benchmark:begin-renderer-to-renderer": function (messagesLength) {
+            "benchmark:begin-renderer-to-renderer": function (event, messagesLength) {
                 this.current = 0;
                 this.messagesLength = messagesLength;
             },
