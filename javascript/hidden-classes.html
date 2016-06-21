@@ -11,21 +11,13 @@
     <script src="node_modules/astrobench/dist/astrobench.js"></script>
 
     <script>
-        // A test suite begins with a call to the global function `suite` with two parameters:
-        // a string and a function.
-        // The string is a name or title for a spec suite – usually what is being tested.
-        // The function is a block of code that implements the suite.
+
         suite('Hidden classes', function(suite) {
             var count = 10000;
             var baseLine = new Array(count);
             var pointInstances = new Array(count);
             var pointLiterals = new Array(count);
 
-            // To help a test suite DRY up any duplicated setup code, provides
-            // the global `setup` functions.
-            // As the name implies the `setup` function is called once.
-            // You can store data in `suite` Object, or define necessary variables.
-            // Code from body of the function will be presented in UI.
             setup(function() {
                 function Point (x, y, z) {
                     this.x = x;
@@ -39,9 +31,6 @@
                 }
             });
 
-            // Benchmark are defined by calling the global function `bench`,
-            // which, like `suite` takes a string and a function.
-            // The string is the title of the test and the function is the test
             bench('baseline', function() {
                 var xSum = 0, ySum = 0, zSum = 0;
                 var array = baseLine;
