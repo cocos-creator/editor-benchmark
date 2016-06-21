@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Object.defineProperty </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+    /**
+     * see also:
+     * https://bugs.chromium.org/p/v8/issues/detail?id=3649
+     * https://www.nczonline.net/blog/2015/11/performance-implication-object-defineproperty/
+     */
+    suite('Object.defineProperty', function(suite) {
+        var LoopCount = 1000;
+
+        function CommonProp () {
+            this.enumProp = 1;
+            this.commonProp = 0;
+        }
+
+        function DefineValueNonEnum () {
+            Object.defineProperty(this, 'enumProp', {
+                value: 1,
+                enumerable: false,
+                writable: true,
+            });
+            this.commonProp = 0;
+        }
+
+        function DefineValueNonEnumNonWritable () {
+            Object.defineProperty(this, 'enumProp', {
+                value: 1,
+                enumerable: false,
+            });
+            this.commonProp = 0;
+        }
+
+        function DefineValueEnum () {
+            Object.defineProperty(this, 'enumProp', {
+                value: 1,
+                enumerable: true,
+                writable: true,
+            });
+            this.commonProp = 0;
+        }
+
+        function DefineGetEnum () {
+            this.commonProp = 1;
+        }
+        Object.defineProperty(DefineGetEnum.prototype, 'getsetProp', {
+            get: function () {
+                return this.commonProp;
+            },
+            set: function (v) {
+                this.commonProp = v;
+            },
+            enumerable: true
+        });
+
+        function DefineGetNonEnum () {
+            this.commonProp = 1;
+        }
+        Object.defineProperty(DefineGetNonEnum.prototype, 'getsetProp', {
+            get: function () {
+                return this.commonProp;
+            },
+            set: function (v) {
+                this.commonProp = v;
+            },
+            enumerable: false
+        });
+
+        function __Define__GetNonEnum () {
+            Object.defineProperty(this, 'getProp', {
+                get: function () {
+                    return 2;
+                },
+                enumerable: false
+            });
+        }
+
+        var normalObj = new CommonProp();
+        var defValueNonEnum = new DefineValueNonEnum();
+        var defValueEnum = new DefineValueEnum();
+        var defGetEnum = new DefineGetEnum();
+        var defGetNonEnum = new DefineGetNonEnum();
+        var defValueNonEnumNonWritable = new DefineValueNonEnumNonWritable();
+
+        bench('Baseline', function() {
+            var obj = normalObj;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+            }
+        });
+
+        bench('Read property defined by assignment', function() {
+            var obj = normalObj;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.enumProp;
+            }
+        });
+        bench('Read non-enumerable property defined by defineProperty', function() {
+            var obj = defValueNonEnum;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.enumProp;
+            }
+        });
+        bench('Read enumerable property defined by defineProperty', function() {
+            var obj = defValueEnum;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.enumProp;
+            }
+        });
+        bench('Read property defined by assignment but object has non-enumerable property defined by defineProperty', function() {
+            var obj = defValueNonEnum;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.commonProp;
+            }
+        });
+        bench('Call enumerable getter defined by defineProperty', function() {
+            var obj = defGetEnum;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.getsetProp;
+            }
+        });
+        bench('Call non-enumerable getter defined by defineProperty', function() {
+            var obj = defGetNonEnum;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.getsetProp;
+            }
+        });
+
+        bench('Write property defined by assignment', function() {
+            var obj = normalObj;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.enumProp = 2;
+            }
+        });
+        bench('Write non-enumerable property defined by defineProperty', function() {
+            var obj = defValueNonEnum;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.enumProp = 2;
+            }
+        });
+        bench('Write non-enumerable and non-writable property defined by defineProperty', function() {
+            var obj = defValueNonEnumNonWritable;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.enumProp = 2;
+            }
+        });
+        bench('Write enumerable property defined by defineProperty', function() {
+            var obj = defValueEnum;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.enumProp = 2;
+            }
+        });
+        bench('Write property defined by assignment but object has non-enumerable property defined by defineProperty', function() {
+            var obj = defValueNonEnum;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.commonProp = 2;
+            }
+        });
+        bench('Call enumerable setter defined by defineProperty', function() {
+            var obj = defGetEnum;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.getsetProp = 2;
+            }
+        });
+        bench('Call non-enumerable setter defined by defineProperty', function() {
+            var obj = defGetNonEnum;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.getsetProp = 2;
+            }
+        });
+    });
+</script>
+</body>
+</html>
