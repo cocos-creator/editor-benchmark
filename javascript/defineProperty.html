@@ -85,12 +85,23 @@
             });
         }
 
+        function CallPropFunction () {
+            this.commonProp = 1;
+        }
+        CallPropFunction.prototype.getProp = function () {
+            return this.commonProp;
+        };
+        CallPropFunction.prototype.setProp = function (v) {
+            this.commonProp = v;
+        };
+
         var normalObj = new CommonProp();
         var defValueNonEnum = new DefineValueNonEnum();
         var defValueEnum = new DefineValueEnum();
         var defGetEnum = new DefineGetEnum();
         var defGetNonEnum = new DefineGetNonEnum();
         var defValueNonEnumNonWritable = new DefineValueNonEnumNonWritable();
+        var callPropFunction = new CallPropFunction();
 
         bench('Baseline', function() {
             var obj = normalObj;
@@ -141,6 +152,13 @@
                 sum += obj.getsetProp;
             }
         });
+        bench('Call function to get', function() {
+            var obj = callPropFunction;
+            var sum = 0;
+            for (var i = 0; i < LoopCount; i++) {
+                sum += obj.getProp();
+            }
+        });
 
         bench('Write property defined by assignment', function() {
             var obj = normalObj;
@@ -182,6 +200,12 @@
             var obj = defGetNonEnum;
             for (var i = 0; i < LoopCount; i++) {
                 obj.getsetProp = 2;
+            }
+        });
+        bench('Call function to set', function() {
+            var obj = callPropFunction;
+            for (var i = 0; i < LoopCount; i++) {
+                obj.setProp(2);
             }
         });
     });
