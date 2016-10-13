@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Array.splice </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+    <!-- Wrapper for tests -->
+    <div id="astrobench"></div>
+    <script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+    <script>
+
+        function removeOne (arr, index) {
+            if (index >= arr.length) {
+                return;
+            }
+            var len = arr.length - 1;
+            for (var i = index; i < len; ++i) {
+                arr[i] = arr[i + 1];
+            }
+
+            arr.length = len;
+        }
+
+        suite('Remove element from array', function(suite) {
+            var LOOP = 1000;
+
+            setup(function() {
+
+            });
+
+            bench('baseline', function() {
+                var array = new Array(LOOP);
+                var sum = 0;
+                for (var i = 0; i < LOOP; i++) {
+                    sum += 1;
+                }
+            });
+
+            bench('Array.splice', function() {
+                var array = new Array(LOOP);
+                for (var i = 0; i < LOOP; i++) {
+                    array.splice(0, 1);
+                }
+            });
+
+            bench('stable remove', function() {
+                var array = new Array(LOOP);
+                for (var i = 0; i < LOOP; i++) {
+                    removeOne(array, 0);
+                }
+            });
+
+            bench('unstable remove', function() {
+                var array = new Array(LOOP);
+                for (var i = 0; i < LOOP; i++) {
+                    array[0] = array[array.length - 1];
+                    --array.length;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

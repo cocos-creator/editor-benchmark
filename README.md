@@ -13,7 +13,7 @@ npm start
 
 ### Run
 
-open `http://127.0.0.1:8513/*.html`
+open `*.html` or ``http://127.0.0.1:8513/*.html`
 
 ### API
 
