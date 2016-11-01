@@ -163,4 +163,9 @@ cc.Class({
 
         this.updateInstantiatePercent();
     },
+
+    testAll () {
+        this.testInstantiate();
+        this.testBaseline();
+    }
 });
