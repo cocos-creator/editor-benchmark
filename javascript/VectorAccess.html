@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> VectorAccess </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+
+    function Vec2 (x, y) {
+        if (x && typeof x === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+
+        this.data = new Float32Array(2);
+        this.data[0] = x || 0;
+        this.data[1] = y || 0;
+
+        Object.defineProperty(this, 'x', {
+            get: function () {
+                return this.data[0];
+            },
+            set: function (value) {
+                this.data[0] = value;
+            },
+            enumerable: true
+        });
+
+        Object.defineProperty(this, 'y', {
+            get: function () {
+                return this.data[1];
+            },
+            set: function (value) {
+                this.data[1] = value;
+            },
+            enumerable: true
+        });
+    }
+
+    function Vec2Proto (x, y) {
+        if (x && typeof x === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+
+        this.data = new Float32Array(2);
+        this.data[0] = x || 0;
+        this.data[1] = y || 0;
+    }
+
+    Object.defineProperty(Vec2Proto.prototype, 'x', {
+        get: function () {
+            return this.data[0];
+        },
+        set: function (value) {
+            this.data[0] = value;
+        },
+    });
+
+    Object.defineProperty(Vec2Proto.prototype, 'y', {
+        get: function () {
+            return this.data[1];
+        },
+        set: function (value) {
+            this.data[1] = value;
+        },
+    });
+
+    function Vec2Direct (x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+        this.data = new Float32Array(2);
+    }
+
+    Vec2Direct.prototype = {
+        getData: function() {
+            var data = this.data;
+            data[0] = this.x;
+            data[1] = this.y;
+            return data;
+        },
+    };
+
+    suite('access x from vec2', function(suite) {
+        var LOOP = 1000;
+
+        setup(function() {
+
+        });
+
+        bench('vec2', function() {
+            var v = new Vec2(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                sum += v.x;
+            }
+        });
+
+        bench('vec2Proto', function() {
+            var v = new Vec2Proto(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                sum += v.x;
+            }
+        });
+
+        bench('vec2direct', function() {
+            var v = new Vec2Direct(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                sum += v.x;
+            }
+        });
+
+    });
+
+    suite('access data from vec2', function(suite) {
+        var LOOP = 1000;
+
+        setup(function() {
+
+        });
+
+        bench('vec2', function() {
+            var v = new Vec2(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                var data = v.data;
+                sum += data[0];
+            }
+        });
+
+        bench('vec2 proto', function() {
+            var v = new Vec2Proto(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                var data = v.data;
+                sum += data[0];
+            }
+        });
+
+        bench('vec2 direct', function() {
+            var v = new Vec2Direct(1,2);
+            var sum = 0;
+            for (var i = 0; i < LOOP; i++) {
+                var data = v.getData();
+                sum += data[0];
+            }
+        });
+
+    });
+
+</script>
+</body>
+</html>
