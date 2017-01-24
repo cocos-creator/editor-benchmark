@@ -107,6 +107,93 @@ function clonePrefab (res) {
     return groupRoot;
 }
 
+function compiledClonePrefab (a, c) {
+    var t = new cc.Node();
+    var v1 = null;
+    t._name = 'Group Prefab';
+    t._position = new cc.Vec2(50, 50);
+    t._components = [
+        (function (){
+            var o = new cc.Group();
+            o.addBtn = (function (){
+                var o = new cc.Button();
+                v1 = o;
+                o._target = (function (){
+                    // add
+                    var add = new cc.Node();
+                    add._name = 'Add';
+                    add._parent = topRightAnchor;
+                    add._contentSize = new cc.Size(94, 94);
+                    add._components = [v1];
+                })();
+                o._transition = 1;
+                return o;
+            })();
+            o.idLabel = labelComp;
+            o.rightBtn1 = rightBtn1;
+            o.rightBtn2 = rightBtn2;
+            o.rightBtn3 = rightBtn3;
+            return o;
+        })()
+    ];
+    t._children = [
+        (function (){
+
+        })()
+    ];
+    var avatar = new cc.Node();
+    avatar.name = 'Avatar';
+    avatar.setAnchorPoint(0, 1);
+    avatar.setScale(0.5, 0.5);
+    avatar.setContentSize(512, 512);
+    var sprite = avatar.addComponent(cc.Sprite);
+    sprite.spriteFrame = res.content;
+    avatar.parent = t;
+
+    var topRightAnchor = new cc.Node();
+    topRightAnchor.name = 'Top Right Anchor';
+    topRightAnchor.x = 512;
+    topRightAnchor.parent = avatar;
+    var topRightAnchorWidget = topRightAnchor.addComponent(cc.Widget);
+    topRightAnchorWidget.isAlignRight = true;
+    topRightAnchorWidget.isAlignTop = true;
+
+    sprite = add.addComponent(cc.Sprite);
+    sprite.spriteFrame = res.add;
+
+    var IDBG = new cc.Node();
+    IDBG.name = 'ID BG';
+    IDBG.setPosition(50, -462);
+    IDBG.setScale(2, 2);
+    IDBG.parent = avatar;
+    var IDBGSprite = IDBG.addComponent(cc.Sprite);
+    IDBGSprite.spriteFrame = res.bg
+    IDBGSprite.type = cc.Sprite.Type.SLICED;
+    IDBGSprite.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+    IDBG.setContentSize(50, 50);
+    var IDBGWidget = IDBG.addComponent(cc.Widget);
+    IDBGWidget.isAlignLeft = true;
+    IDBGWidget.isAlignBottom = true;
+
+    var label = new cc.Node();
+    label.name = 'Label';
+    label.setContentSize(24.44, 54.44);
+    label.parent = IDBG;
+    var labelComp = label.addComponent(cc.Label);
+    labelComp.string = '1';
+    labelComp.lineHeight = 49;
+    labelComp.font = res.font;
+
+    var rightBtn1 = createButtonManually(res, 'Button 1', 341, -73);
+    rightBtn1.parent = t;
+    var rightBtn2 = createButtonManually(res, 'Button 2', 341, -131);
+    rightBtn2.parent = t;
+    var rightBtn3 = createButtonManually(res, 'Button 3', 341, -189);
+    rightBtn3.parent = t;
+
+    return t;
+}
+
 cc.Class({
     extends: cc.Component,
 
@@ -131,6 +218,7 @@ cc.Class({
     testInstantiate () {
         var startTime = Date.now();
 
+        //cc.instantiate(this.prefab).parent = this.node;
         for (var i = 0; i < this.copyCount; ++i) {
             cc.instantiate(this.prefab);
         }

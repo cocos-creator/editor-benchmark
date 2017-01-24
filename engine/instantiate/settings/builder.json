@@ -1,0 +1,17 @@
+{
+  "excludeScenes": [],
+  "includeAnySDK": false,
+  "includeSdk": [
+    "anysdk"
+  ],
+  "orientation": {
+    "landscapeLeft": true,
+    "landscapeRight": true,
+    "portrait": false,
+    "upsideDown": false
+  },
+  "packageName": "org.cocos2d.instantiate",
+  "startScene": "360484e9-9ef5-4121-8ca4-e0d192bfe4a1",
+  "title": "instantiate",
+  "webOrientation": "auto"
+}
