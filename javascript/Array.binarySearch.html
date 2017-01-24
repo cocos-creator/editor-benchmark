@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Binary Search </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+    <!-- Wrapper for tests -->
+    <div id="astrobench"></div>
+    <script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+    <script>
+        function binarySearch (array, value) {
+            for (var l = 0, h = array.length - 1, m = h >>> 1;
+                 l <= h;
+                 m = (l + h) >>> 1
+            ) {
+                var test = array[m];
+                if (test > value) {
+                    h = m - 1;
+                }
+                else if (test < value) {
+                    l = m + 1;
+                }
+                else {
+                    return m;
+                }
+            }
+            return ~l;
+        }
+
+        var EPSILON = 1e-6;
+        function binarySearchEpsilon (array, value) {
+            for (var l = 0, h = array.length - 1, m = h >>> 1;
+                 l <= h;
+                 m = (l + h) >>> 1
+            ) {
+                var test = array[m];
+                if (test > value + EPSILON) {
+                    h = m - 1;
+                }
+                else if (test < value - EPSILON) {
+                    l = m + 1;
+                }
+                else {
+                    return m;
+                }
+            }
+            return ~l;
+        }
+        function binarySearchEpsilonOld (array, value) {
+            var l = 0, h = array.length - 1;
+            while (l <= h) {
+                var m = ((l + h) >> 1);
+
+                if (Math.abs(array[m] - value) < EPSILON) {
+                    return m;
+                }
+                if (array[m] > value) {
+                    h = m - 1;
+                }
+                else {
+                    l = m + 1;
+                }
+            }
+            return ~l;
+        }
+
+        function linearSearch (array, value) {
+            var i = 0;
+            for (; i < array.length; i++) {
+                var test = array[i];
+                if (value < test) {
+                    return ~i;
+                }
+                else if (value === test) {
+                    return i;
+                }
+            }
+            return ~i;
+        }
+
+        function test (title, elementCount, compareEpsilon) {
+            suite(title + ': array length is ' + elementCount, function () {
+                var LoopCount = 100;
+                var intArray = new Array(elementCount);
+                var floatArray = new Array(elementCount);
+
+                setup(function() {
+                    for (var i = 0; i < elementCount; i++) {
+                        floatArray[i] = (Math.random() - 0.5) * elementCount;
+                        intArray[i] = floatArray[i] | 0;
+                    }
+                    floatArray.sort();
+                    intArray.sort();
+                });
+
+                if (!compareEpsilon) {
+                    bench('linearSearch', function() {
+                        for (var l = 0; l < LoopCount; l++) {
+                            var t = elementCount >> 1;
+                            for (var i = -t; i < t; i++) {
+                                linearSearch(intArray, i);
+                            }
+                        }
+                    });
+
+                    bench('binarySearch', function() {
+                        for (var l = 0; l < LoopCount; l++) {
+                            var t = elementCount >> 1;
+                            for (var i = -t; i < t; i++) {
+                                binarySearch(intArray, i);
+                            }
+                        }
+                    });
+                }
+
+                bench('binarySearchEpsilon', function() {
+                    for (var l = 0; l < LoopCount; l++) {
+                        var t = elementCount * 0.5;
+                        for (var i = -t; i < t; i++) {
+                            binarySearchEpsilon(floatArray, i);
+                        }
+                    }
+                });
+
+                if (compareEpsilon) {
+                    bench('binarySearchEpsilonOld', function() {
+                        for (var l = 0; l < LoopCount; l++) {
+                            var t = elementCount * 0.5;
+                            for (var i = -t; i < t; i++) {
+                                binarySearchEpsilonOld(floatArray, i);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        test('Binary Search', 5);   // 5 个左右时，使用 binarySearch 性能和 linearSearch 十分接近
+        test('Binary Search', 20);
+        test('Binary Search', 100);
+        test('binarySearchEpsilon: new vs old', 50, true);
+    </script>
+</body>
+</html>
