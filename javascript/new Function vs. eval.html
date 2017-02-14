@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Benchmark </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+
+    suite('new Function vs. eval', function(suite) {
+
+        function callFuction (code) {
+            Function(code)();
+        }
+
+        function callEval (code) {
+            eval(code);
+        }
+
+        function callEvalR (code) {
+            (0, eval)(code);
+        }
+
+        var code = 'var s = 0; for (var j = 0; j < 5; j++) { ++s; }';
+
+        bench('inlined Function', function() {
+            Function(code)();
+        });
+
+        bench('inlined new Function', function() {
+            (new Function(code))();
+        });
+
+        bench('callFunction', function() {
+            callFuction(code);
+        });
+
+        bench('inlined eval', function() {
+            eval(code);
+        });
+
+        bench('eval', function() {
+            callEval(code);
+        });
+
+        bench('(0, eval)', function() {
+            callEvalR(code);
+        });
+
+    });
+
+</script>
+</body>
+</html>
