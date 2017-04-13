@@ -1,9 +1,14 @@
 {
+  "appKey": "",
+  "appSecret": "",
   "excludeScenes": [],
   "includeAnySDK": false,
   "includeSdk": [
     "anysdk"
   ],
+  "inlineSpriteFrames": false,
+  "mergeStartScene": false,
+  "oauthLoginServer": "",
   "orientation": {
     "landscapeLeft": true,
     "landscapeRight": true,
@@ -11,7 +16,9 @@
     "upsideDown": false
   },
   "packageName": "org.cocos2d.instantiate",
-  "startScene": "360484e9-9ef5-4121-8ca4-e0d192bfe4a1",
+  "privateKey": "",
+  "renderMode": "0",
+  "startScene": "56619d2c-61b2-4342-9ad0-db6f345a74da",
   "title": "instantiate",
   "webOrientation": "auto"
 }
