@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Benchmark </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+
+    suite('new Function vs. eval', function(suite) {
+
+        var Base64 = window.Base64 = {name:'Jacob__Codec__Base64'};
+
+        Base64._keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+        var HexStrs = '0123456789abcdef'.split('');
+
+        Base64.decode1 = function (input) {
+            var output = [],
+                chr1, chr2, chr3,
+                enc1, enc2, enc3, enc4,
+                i = 0;
+
+            input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+            while (i < input.length) {
+                enc1 = this._keyStr.indexOf(input.charAt(i++));
+                enc2 = this._keyStr.indexOf(input.charAt(i++));
+                enc3 = this._keyStr.indexOf(input.charAt(i++));
+                enc4 = this._keyStr.indexOf(input.charAt(i++));
+
+                chr1 = (enc1 << 2) | (enc2 >> 4);
+                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                chr3 = ((enc3 & 3) << 6) | enc4;
+
+                output.push(String.fromCharCode(chr1));
+
+                if (enc3 !== 64) {
+                    output.push(String.fromCharCode(chr2));
+                }
+                if (enc4 !== 64) {
+                    output.push(String.fromCharCode(chr3));
+                }
+            }
+
+            output = output.join('');
+
+            return output;
+        };
+
+        bench('origin decode', function() {
+            Base64.decode1('NHXHs35F1rbFJZKeigkl')
+        });
+
+        var AsciiTo64 = Base64.AsciiTo64 = new Array(128);
+        for (var i = 0; i < 128; ++i) { Base64.AsciiTo64[i] = 0; }
+        for (i = 0; i < 65; ++i) { Base64.AsciiTo64[Base64._keyStr.charCodeAt(i)] = i; }
+
+        Base64.decode2 = function (input) {
+            var output = [],
+                chr1, chr2, chr3,
+                enc1, enc2, enc3, enc4,
+                i = 0;
+
+            input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+            while (i < input.length) {
+                enc1 = this.AsciiTo64[input.charCodeAt(i++)];
+                enc2 = this.AsciiTo64[input.charCodeAt(i++)];
+                enc3 = this.AsciiTo64[input.charCodeAt(i++)];
+                enc4 = this.AsciiTo64[input.charCodeAt(i++)];
+
+                chr1 = (enc1 << 2) | (enc2 >> 4);
+                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                chr3 = ((enc3 & 3) << 6) | enc4;
+
+                output.push(String.fromCharCode(chr1));
+
+                if (enc3 !== 64) {
+                    output.push(String.fromCharCode(chr2));
+                }
+                if (enc4 !== 64) {
+                    output.push(String.fromCharCode(chr3));
+                }
+            }
+
+            output = output.join('');
+
+            return output;
+        };
+
+        bench('optimized decode', function() {
+            Base64.decode2('NHXHs35F1rbFJZKeigkl');
+        });
+
+        var sections3 = ['','','','', '','','','', '','','','', '','','','', '','','','',
+                         '','','','', '','','','', '','','',''];
+        Base64.decode3 = function (str) {
+            for (var i = 2, j = 0; i < 22; i += 2) {
+                var lhs = AsciiTo64[str.charCodeAt(i)];
+                var rhs = AsciiTo64[str.charCodeAt(i + 1)];
+                sections3[j++] = HexStrs[lhs >> 2];
+                sections3[j++] = HexStrs[((lhs & 3) << 2) | rhs >> 4];
+                sections3[j++] = HexStrs[rhs & 0xF];
+            }
+            //
+            str = str.slice(0, 2) + sections3.join('');
+            return [str.slice(0, 8), str.slice(8, 12), str.slice(12, 16), str.slice(16, 20), str.slice(20)].join('-');
+        };
+
+        bench('decompress uuid', function() {
+            Base64.decode3("fcmR3XADNLgJ1ByKhqcC5Z");
+        });
+
+        var Fragments = [0,0,0,0, 0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 4,4,4,4, 4,4,4,4, 4,4,4,4];
+        var sections4 = ['', '', '', '', ''];
+        Base64.decode4 = function (str) {
+            sections4[0] = str.slice(0, 2);
+            sections4[1] = '';
+            sections4[2] = '';
+            sections4[3] = '';
+            sections4[4] = '';
+            for (var i = 2, j = 2; i < 22; i += 2) {
+                var lhs = AsciiTo64[str.charCodeAt(i)];
+                var rhs = AsciiTo64[str.charCodeAt(i + 1)];
+                sections4[Fragments[j++]] += HexStrs[lhs >> 2];
+                sections4[Fragments[j++]] += HexStrs[((lhs & 3) << 2) | rhs >> 4];
+                sections4[Fragments[j++]] += HexStrs[rhs & 0xF];
+            }
+            return sections4.join('-');
+        };
+
+        bench('optimized decompress uuid', function() {
+            Base64.decode4("fcmR3XADNLgJ1ByKhqcC5Z");
+        });
+
+        var T = ['', '', '', ''];
+        var sections5 = T.concat(T, '-', T, '-', T, '-', T, '-', T, T, T);
+        var locations5 = sections5.map(function (x, i) { return x == '-' ? NaN : i; }).filter(isFinite);
+
+        Base64.decode5 = function (str) {
+            sections5[0] = str[0];
+            sections5[1] = str[1];
+            for (var i = 2, j = 2; i < 22; i += 2) {
+                var lhs = AsciiTo64[str.charCodeAt(i)];
+                var rhs = AsciiTo64[str.charCodeAt(i + 1)];
+                sections5[locations5[j++]] = HexStrs[lhs >> 2];
+                sections5[locations5[j++]] = HexStrs[((lhs & 3) << 2) | rhs >> 4];
+                sections5[locations5[j++]] = HexStrs[rhs & 0xF];
+            }
+            return sections5.join('');
+        };
+
+        bench('optimized decompress uuid 2', function() {
+            Base64.decode5("fcmR3XADNLgJ1ByKhqcC5Z");
+        });
+    });
+
+</script>
+</body>
+</html>

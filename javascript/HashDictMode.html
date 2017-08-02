@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Optimize performance of maps </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+
+(function () {
+
+    var KEY_COUNT = 25;
+    var LOOP = 1;
+    var TestBaseline = false;
+
+    function createLiteralMap () {
+        return {};
+    }
+
+    function createLiteralMapWithDelete () {
+        var map = createLiteralMap();
+        map._ = undefined;
+        delete map._;
+        return map;
+    }
+
+    function createFlatMap () {
+        return Object.create(null);
+    }
+
+    function createFlatMapWithDelete () {
+        var map = createFlatMap();
+        map._ = undefined;
+        delete map._;
+        return map;
+    }
+
+    var KEYS = [];
+    for (var i = 0; i < KEY_COUNT; i++) {
+        KEYS[i] = 'key' + Math.random();
+    }
+
+    function fillMap (map) {
+        for (var i = 0; i < KEY_COUNT; i++) {
+            map[KEYS[i]] = true;
+        }
+    }
+
+    suite('get property', function(suite) {
+
+        var literalMap = createLiteralMap();
+        var flatMap = createFlatMap();
+        var literalMapWithDelete = createLiteralMapWithDelete();
+        var flatMapWithDelete = createFlatMapWithDelete();
+
+        fillMap(literalMap);
+        fillMap(literalMapWithDelete);
+        fillMap(flatMap);
+        fillMap(flatMapWithDelete);
+
+        if (TestBaseline) {
+            bench('baseline', function() {
+                for (var l = 0; l < LOOP; l++) {
+                    var sum = '';
+                    for (var i = 0; i < KEY_COUNT; i++) {
+                        sum = KEYS[i];
+                    }
+                }
+            });
+        }
+
+        bench('{}', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    sum = literalMap[KEYS[i]];
+                }
+            }
+        });
+
+        bench('{} with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    sum = literalMapWithDelete[KEYS[i]];
+                }
+            }
+        });
+
+        bench('Object.create(null)', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    sum = flatMap[KEYS[i]];
+                }
+            }
+        });
+
+        bench('Object.create(null) with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    sum = flatMapWithDelete[KEYS[i]];
+                }
+            }
+        });
+    });
+
+    suite('modify property', function(suite) {
+
+
+        var literalMap = createLiteralMap();
+        var flatMap = createFlatMap();
+        var literalMapWithDelete = createLiteralMapWithDelete();
+        var flatMapWithDelete = createFlatMapWithDelete();
+
+        fillMap(literalMap);
+        fillMap(literalMapWithDelete);
+        fillMap(flatMap);
+        fillMap(flatMapWithDelete);
+
+        if (TestBaseline) {
+            bench('baseline', function() {
+                for (var l = 0; l < LOOP; l++) {
+                    var sum = '';
+                    for (var i = 0; i < KEY_COUNT; i++) {
+                        sum = KEYS[i];
+                    }
+                }
+            });
+        }
+
+        bench('{}', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMap[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('{} with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMapWithDelete[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('Object.create(null)', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMap[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('Object.create(null) with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMapWithDelete[KEYS[i]] = true;
+                }
+            }
+        });
+    });
+
+    suite('create map and add property', function(suite) {
+
+
+        if (TestBaseline) {
+            bench('baseline', function() {
+                for (var l = 0; l < LOOP; l++) {
+                    var sum = '';
+                    for (var i = 0; i < KEY_COUNT; i++) {
+                        sum = KEYS[i];
+                    }
+                }
+            });
+        }
+
+        bench('{}', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var literalMap = createLiteralMap();
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMap[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('{} with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var literalMapWithDelete = createLiteralMapWithDelete();
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMapWithDelete[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('Object.create(null)', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var flatMap = createFlatMap();
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMap[KEYS[i]] = true;
+                }
+            }
+        });
+
+        bench('Object.create(null) with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var flatMapWithDelete = createFlatMapWithDelete();
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMapWithDelete[KEYS[i]] = true;
+                }
+            }
+        });
+    });
+
+    suite('for in get property', function(suite) {
+
+
+        var literalMap = createLiteralMap();
+        var flatMap = createFlatMap();
+        var literalMapWithDelete = createLiteralMapWithDelete();
+        var flatMapWithDelete = createFlatMapWithDelete();
+
+        fillMap(literalMap);
+        fillMap(literalMapWithDelete);
+        fillMap(flatMap);
+        fillMap(flatMapWithDelete);
+
+        if (TestBaseline) {
+            bench('baseline', function() {
+                for (var l = 0; l < LOOP; l++) {
+                    var sum = '';
+                    for (var i = 0; i < KEY_COUNT; i++) {
+                        sum = KEYS[i];
+                    }
+                }
+            });
+        }
+
+        bench('{}', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var key in literalMap) {
+                    if (literalMap.hasOwnProperty(key)) {
+                        sum = literalMap[key];
+                    }
+                }
+            }
+        });
+
+        bench('{} with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var key in literalMapWithDelete) {
+                    if (literalMapWithDelete.hasOwnProperty(key)) {
+                        sum = literalMapWithDelete[key];
+                    }
+                }
+            }
+        });
+
+        bench('Object.create(null)', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var key in flatMap) {
+                    sum = flatMap[key];
+                }
+            }
+        });
+
+        bench('Object.create(null) with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                var sum = false;
+                for (var key in flatMapWithDelete) {
+                    sum = flatMapWithDelete[key];
+                }
+            }
+        });
+    });
+
+    suite('change shape', function(suite) {
+
+        var literalMap = createLiteralMap();
+        var flatMap = createFlatMap();
+        var literalMapWithDelete = createLiteralMapWithDelete();
+        var flatMapWithDelete = createFlatMapWithDelete();
+
+        fillMap(literalMap);
+        fillMap(literalMapWithDelete);
+        fillMap(flatMap);
+        fillMap(flatMapWithDelete);
+
+        if (TestBaseline) {
+            bench('baseline', function() {
+                for (var l = 0; l < LOOP; l++) {
+                    var sum = '';
+                    for (var i = 0; i < KEY_COUNT; i++) {
+                        sum = KEYS[i];
+                    }
+                }
+            });
+        }
+
+        bench('{}', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMap[KEYS[i] + 'd'] = true;
+                }
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    delete literalMap[KEYS[i] + 'd'];
+                }
+            }
+        });
+
+        bench('{} with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    literalMapWithDelete[KEYS[i] + 'd'] = true;
+                }
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    delete literalMapWithDelete[KEYS[i] + 'd'];
+                }
+            }
+        });
+
+        bench('Object.create(null)', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMap[KEYS[i] + 'd'] = true;
+                }
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    delete flatMap[KEYS[i] + 'd'];
+                }
+            }
+        });
+
+        bench('Object.create(null) with delete', function() {
+            for (var l = 0; l < LOOP; l++) {
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    flatMapWithDelete[KEYS[i] + 'd'] = true;
+                }
+                for (var i = 0; i < KEY_COUNT; i++) {
+                    delete flatMapWithDelete[KEYS[i] + 'd'];
+                }
+            }
+        });
+    });
+
+})();
+</script>
+</body>
+</html>
