@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> VectorAccess </title>
+    <link rel="stylesheet" href="node_modules/astrobench/src/style.css">
+</head>
+<body>
+<!-- Wrapper for tests -->
+<div id="astrobench"></div>
+<script src="node_modules/astrobench/dist/astrobench.js"></script>
+
+<script>
+
+    function getMixed () {
+        return JSON.parse('[1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,""]');
+    }
+
+    function getDoubled () {
+        return JSON.parse('[1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]');
+    }
+
+    function getNegative () {
+        return JSON.parse('[-1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,-9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,-4,5,6,7,8,9,10,8,9,10,1,2,-3,-4,-5,6,7,8,9,10,1,2,3,4,-5,6,7,8,9,10]');
+    }
+
+    suite('access x from vec2', function (suite) {
+        var LOOP = 100000;
+
+        var mixed = new Array(LOOP);
+        var doubled = new Array(LOOP);
+        var neg = new Array(LOOP);
+
+        // setup(function () {
+            for (let i = 0; i < LOOP; i++) {
+                mixed[i] = getMixed();
+                doubled[i] = getDoubled();
+                neg[i] = getNegative();
+            }
+        // });
+
+
+
+        console.time('double only array');
+        (function () {
+            for (let i = 0; i < LOOP; i++) {
+                doubled[i][0] = "1";
+            }
+        })();
+        console.timeEnd('double only array');
+
+        console.time('neg array');
+        (function () {
+            for (let i = 0; i < LOOP; i++) {
+                neg[i][0] = "1";
+            }
+        })();
+        console.timeEnd('neg array');
+
+        console.time('mixed array');
+        (function () {
+            let len = mixed[0].length - 1;
+            for (let i = 0; i < LOOP; i++) {
+                // mixed[i].length = len;
+                mixed[i][0] = "1";
+            }
+        })();
+        console.timeEnd('mixed array');
+
+
+        // bench('mixed array', function () {
+        //
+        // });
+        //
+        // bench('double only array', function () {
+        //
+        // });
+    });
+
+</script>
+</body>
+</html>

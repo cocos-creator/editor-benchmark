@@ -25,10 +25,15 @@ cc.Class({
         var startTime = Date.now();
 
         for (var i = 0; i < this.loopCount; ++i) {
+        }
+
+        var baseTime = Date.now() - startTime;
+
+        for (var i = 0; i < this.loopCount; ++i) {
             new cc.Node();
         }
 
-        testTime = Date.now() - startTime;
+        testTime = Date.now() - startTime - baseTime * 2;
         this.timeLabel.string = testTime;
 
         this.updatePercent();
@@ -37,12 +42,26 @@ cc.Class({
     testBaseline () {
         var startTime = Date.now();
 
-        for (var i = 0; i < 4000000; ++i) {
-            new cc.Component();
+        for (var i = 0; i < this.loopCount; ++i) {
         }
 
-        baselineTime = Date.now() - startTime;
-        this.baselineTimeLabel.string = baselineTime;
+        var baseTime = Date.now() - startTime;
+
+        for (var i = 0; i < this.loopCount; ++i) {
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+            new cc.Widget();
+        }
+
+        baseTime = Date.now() - startTime - baseTime * 2;
+        this.baselineTimeLabel.string = baseTime;
 
         this.updatePercent();
     },
